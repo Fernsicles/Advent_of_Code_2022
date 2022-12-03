@@ -1,0 +1,3 @@
+#!/usr/bin/env nu
+
+open input | str replace -a X A | str replace -a Y B | str replace -a Z C | from csv --separator ' ' --noheaders | each { |i| { opp: ($i.column1 | into int -r 16 | $in - 9), own: ($i.column2 | into int -r 16 | $in - 9) } } | each { |i| { own: $i.own, diff: ($i.opp - $i.own) } } | each { |i| ([[val res]; [0 3] [1 0] [2 6] [-1 6] [-2 0]] | where val == $i.diff | get 0.res) + $i.own } | math sum
