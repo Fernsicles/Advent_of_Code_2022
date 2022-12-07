@@ -1,0 +1,3 @@
+#!/usr/bin/env nu
+
+do { mkdir files; cd files; open ../input | split row "\n" | drop nth 0 | reduce -f './' { |i acc| cd $acc; $i | split row ' ' | if ($in | length) == 2 && $in.0 != '$' { if $in.0 == 'dir' { mkdir $in.1 | $acc } else { $in | do { |j| seq 1 ($j.0 | into int) | par-each { |i| "a" } | str join '' | save ($acc | path join $j.1) } $in | $acc } } else if $in.1 == 'cd' { $in | do { |j| $acc | path join $j.2 } $in } else { $acc } | path expand } | ls **/* | where type == file | get size | into int | do { |all| ls ** | par-each { |i| ls -d $'($i.name)/**/*' | where type == file | if ($in | length) > 0 { get size | math sum | into int } } | where { |i| $i >= (30000000 - (70000000 - ($all | math sum))) } } $in | math min }
